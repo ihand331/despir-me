@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Despir Virtual - Simulador</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(to bottom, #f0f8ff, #e6e6fa);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #4a4a4a;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .character-area {
+            position: relative;
+            width: 400px;
+            height: 600px;
+            margin: 30px auto;
+            background-color: #f9f9f9;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .body-base {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://via.placeholder.com/400x600/ffdab9/000000?text=Corpo+Básico');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        .clothing-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: opacity 0.5s ease-in-out;
+            z-index: 2;
+        }
+
+        #shirt { background-image: url('https://via.placeholder.com/400x600/ff6b6b/ffffff?text=Camisa+Vermelha'); opacity: 1; }
+        #pants { background-image: url('https://via.placeholder.com/400x600/4ecdc4/ffffff?text=Calça+Azul'); opacity: 1; z-index: 3; }
+        #jacket { background-image: url('https://via.placeholder.com/400x600/45b7d1/ffffff?text=Jaqueta+Preta'); opacity: 1; z-index: 4; }
+        #shoes { background-image: url('https://via.placeholder.com/400x600/96ceb4/ffffff?text=Sapatos+Brown'); opacity: 1; bottom: 0; height: 150px; }
+
+        .controls {
+            margin: 30px 0;
+        }
+
+        button {
+            background-color: #e74c3c;
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            font-size: 16px;
+            margin: 8px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #c0392b;
+        }
+
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .reset-btn {
+            background-color: #3498db;
+        }
+
+        .reset-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .status {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #27ae60;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧥 Despir Virtual - Simulador Interativo</h1>
+        <p>Um site simples para simular a remoção de roupas de um personagem virtual. Clique nos botões para "despir" camada por camada. É só uma animação fictícia!</p>
+
+        <div class="character-area">
+            <div class="body-base" id="body"></div>
+            
+            <div class="clothing-layer" id="jacket"></div>
+            <div class="clothing-layer" id="shirt"></div>
+            <div class="clothing-layer" id="pants"></div>
+            <div class="clothing-layer" id="shoes" style="bottom: 0; height: 150px; background-position: bottom;"></div>
+        </div>
+
+        <div class="controls">
+            <button onclick="removeClothing('jacket')" id="jacketBtn">Remover Jaqueta</button>
+            <button onclick="removeClothing('shirt')" id="shirtBtn">Remover Camisa</button>
+            <button onclick="removeClothing('pants')" id="pantsBtn">Remover Calça</button>
+            <button onclick="removeClothing('shoes')" id="shoesBtn">Remover Sapatos</button>
+            <br>
+            <button class="reset-btn" onclick="resetClothing()">Resetar Tudo</button>
+        </div>
+
+        <div class="status" id="status">Pronto para despir! Comece clicando em uma peça.</div>
+    </div>
+
+    <script>
+        let removedClothes = 0;
+        const totalClothes = 4;
+
+        const clothingIds = ['jacket', 'shirt', 'pants', 'shoes'];
+        const btnIds = ['jacketBtn', 'shirtBtn', 'pantsBtn', 'shoesBtn'];
+
+        function removeClothing(layerId) {
+            const layer = document.getElementById(layerId);
+            const btn = document.getElementById(layerId + 'Btn');
+            
+            if (layer.style.opacity !== '0') {
+                layer.style.opacity = '0';
+                removedClothes++;
+                btn.disabled = true;
+                btn.textContent = 'Removido!';
+                btn.style.backgroundColor = '#95a5a6';
+                
+                // Revela o corpo base progressivamente
+                document.getElementById('body').style.opacity = Math.min(1, removedClothes / totalClothes);
+                
+                updateStatus();
+                
+                // Som de transição (opcional, usa Web Audio simples)
+                playTransitionSound();
+            }
+        }
+
+        function resetClothing() {
+            clothingIds.forEach(id => {
+                const layer = document.getElementById(id);
+                const btn = document.getElementById(id + 'Btn');
+                layer.style.opacity = '1';
+                btn.disabled = false;
+                btn.textContent = `Remover ${id.charAt(0).toUpperCase() + id.slice(1)}`;
+                btn.style.backgroundColor = '#e74c3c';
+            });
+            
+            document.getElementById('body').style.opacity = '0';
+            removedClothes = 0;
+            updateStatus();
+        }
+
+        function updateStatus() {
+            const status = document.getElementById('status');
+            if (removedClothes === totalClothes) {
+                status.textContent = 'Tudo despido! O personagem está "nu" virtualmente. 😊';
+                status.style.color = '#e74c3c';
+            } else {
+                status.textContent = `${removedClothes}/${totalClothes} peças removidas. Continue!`;
+                status.style.color = '#27ae60';
+            }
+        }
+
+        function playTransitionSound() {
+            // Som simples de fade (requer suporte do navegador)
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = 400;
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        // Inicializa status
+        updateStatus();
+    </script>
+</body>
+</html>
